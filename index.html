@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Code Editor 🧑‍💻✨</title>
+  <title>Webitz 🧑‍💻✨</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
   <style>
@@ -12,6 +12,7 @@
       margin: 0;
       background-color: #1e1e1e;
       color: white;
+      overflow: hidden;
     }
     #editor {
       height: 100%;
@@ -21,10 +22,10 @@
       width: 100%;
       height: 100%;
       border: none;
-      background-color: white;
+      background-color: #1e1e1e;
     }
     #fileTree {
-      width: 200px;
+      width: 220px;
       overflow-y: auto;
       background: #2e2e2e;
       color: white;
@@ -32,35 +33,70 @@
     }
     #fileTree ul { list-style: none; padding-left: 1rem; }
     #fileTree li:hover { background: #3e3e3e; cursor: pointer; }
+    /* Spinner */
+    .spinner {
+      border: 8px solid rgba(255, 255, 255, 0.1);
+      border-top: 8px solid #3490dc;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #loadingOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
   </style>
 </head>
 <body class="flex flex-col h-screen">
+  <!-- Loading Spinner -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
   <div class="flex p-2 bg-gray-800 text-white">
-    <button id="openBtn" class="mr-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded" disabled>📂 Open</button>
+    <button id="openBtn" class="mr-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded" disabled>📂 Open Folder</button>
+    <button id="newFileBtn" class="mr-2 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded" disabled>📄 New File</button>
     <button id="saveBtn" class="mr-2 px-3 py-1 bg-green-600 hover:bg-green-700 rounded" disabled>💾 Save</button>
-    <button id="darkModeToggle" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded">🌙 Dark Mode</button>
   </div>
   <div class="flex flex-1 overflow-hidden">
     <div id="fileTree"></div>
     <div id="editor" class="w-1/2"></div>
-    <iframe id="preview" class="w-1/2 bg-white"></iframe>
+    <iframe id="preview" class="w-1/2"></iframe>
   </div>
 
   <script>
     let editor;
     let currentHandle = null;
+    let currentDirHandle = null;
+    let autosaveInterval;
 
+    // Initialize Monaco Editor
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
     require(["vs/editor/editor.main"], function () {
       editor = monaco.editor.create(document.getElementById('editor'), {
         value: `<!DOCTYPE html>
 <html>
-<head><style>body { font-family: sans-serif; }</style></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voorbeeld</title>
+  <style>body { font-family: sans-serif; background: #1e1e1e; color: #e0e0e0; }</style>
+</head>
 <body>
-  <h1>Hello world! 👋</h1>
-  <script>
-    console.log("Live preview werkt! 🎉");
-  <\/script>
+  <h1 style="text-align:center; margin-top:2rem;">Webitz Voorbeeld 🌙</h1>
 </body>
 </html>`,
         language: 'html',
@@ -69,6 +105,28 @@
 
       editor.onDidChangeModelContent(() => updatePreview());
       updatePreview();
+
+      // Hide loading overlay once editor is ready
+      document.getElementById('loadingOverlay').style.display = 'none';
+
+      // Enable folder and new file buttons if FS API available
+      if ('showDirectoryPicker' in window) {
+        document.getElementById('openBtn').disabled = false;
+        document.getElementById('newFileBtn').disabled = false;
+      }
+
+      // Setup autosave every 30 seconds if a file is open
+      autosaveInterval = setInterval(() => {
+        if (currentHandle) saveFile();
+      }, 30000);
+
+      // Ctrl+S binding
+      window.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          saveFile();
+        }
+      });
     });
 
     function updatePreview() {
@@ -81,35 +139,53 @@
 
     const fileTree = document.getElementById("fileTree");
 
-    // File System Access API functionaliteit
-    const canUseFileSystemAPI = 'showDirectoryPicker' in window;
-    if (canUseFileSystemAPI) {
-      document.getElementById('openBtn').disabled = false;
-      document.getElementById('saveBtn').disabled = false;
-
-      document.getElementById('openBtn').addEventListener('click', async () => {
-        try {
-          const dirHandle = await window.showDirectoryPicker();
-          fileTree.innerHTML = '';
-          await listFiles(dirHandle, fileTree);
-        } catch (err) {
-          console.error("Directory open failed", err);
-          alert("Map openen mislukt of geannuleerd.");
-        }
-      });
-
-      document.getElementById('saveBtn').addEventListener('click', async () => {
-        try {
-          if (!currentHandle) return alert("Geen bestand geselecteerd!");
-          const writable = await currentHandle.createWritable();
-          await writable.write(editor.getValue());
-          await writable.close();
-        } catch (err) {
-          console.error("Save canceled or failed", err);
-          alert("Bestand opslaan mislukt of geannuleerd.");
-        }
-      });
+    async function saveFile() {
+      try {
+        if (!currentHandle) return;
+        const writable = await currentHandle.createWritable();
+        await writable.write(editor.getValue());
+        await writable.close();
+        console.log("Autosaved: ", currentHandle.name);
+      } catch (err) {
+        console.error("Save failed", err);
+        alert("Opslaan mislukt. Zorg dat je browser deze functie ondersteunt.");
+      }
     }
+
+    // Open folder
+    document.getElementById('openBtn').addEventListener('click', async () => {
+      try {
+        currentDirHandle = await window.showDirectoryPicker();
+        fileTree.innerHTML = '';
+        await listFiles(currentDirHandle, fileTree);
+        document.getElementById('saveBtn').disabled = false;
+      } catch (err) {
+        console.error("Directory open failed", err);
+        alert("Map openen mislukt of geannuleerd.");
+      }
+    });
+
+    // Create new file
+    document.getElementById('newFileBtn').addEventListener('click', async () => {
+      if (!currentDirHandle) return alert("Open eerst een map om een nieuw bestand te maken.");
+      const fileName = prompt("Bestandsnaam (inclusief extensie):");
+      if (!fileName) return;
+      try {
+        const newHandle = await currentDirHandle.getFileHandle(fileName, { create: true });
+        await refreshFileTree();
+        // Auto-select new file
+        const file = await newHandle.getFile();
+        const text = await file.text();
+        editor.setValue(text);
+        currentHandle = newHandle;
+      } catch(err) {
+        console.error("File creation failed", err);
+        alert("Bestand aanmaken mislukt.");
+      }
+    });
+
+    // Save button
+    document.getElementById('saveBtn').addEventListener('click', saveFile);
 
     async function listFiles(dirHandle, container) {
       container.innerHTML = '<ul></ul>';
@@ -118,7 +194,6 @@
         const li = document.createElement('li');
         li.textContent = entry.name;
         li.classList.add("px-2", "py-1");
-
         if (entry.kind === 'file') {
           li.addEventListener('click', async () => {
             const file = await entry.getFile();
@@ -128,15 +203,18 @@
           });
         } else if (entry.kind === 'directory') {
           li.innerHTML = `📁 ${entry.name}`;
+          // Optionally, handle nested directories here
         }
         ul.appendChild(li);
       }
     }
 
-    document.getElementById('darkModeToggle').addEventListener('click', () => {
-      const newTheme = monaco.editor.getTheme() === 'vs-dark' ? 'vs-light' : 'vs-dark';
-      monaco.editor.setTheme(newTheme);
-    });
+    async function refreshFileTree() {
+      if (currentDirHandle) {
+        fileTree.innerHTML = '';
+        await listFiles(currentDirHandle, fileTree);
+      }
+    }
   </script>
 </body>
 </html>
