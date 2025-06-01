@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webitz (Improved!)</title>
-  <!-- Favicon als SVG met een floppy-disk emoji -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%92%BE%3C/text%3E%3C/svg%3E">
+  <title>Webitz</title>
+  <!-- Favicon met floppy-disk icoon -->
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%92%BE%3C/text%3E%3C/svg%3E"
+  />
   <!-- TailwindCSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
     rel="stylesheet"
   />
-  <!-- Font Awesome voor icoontjes -->
+  <!-- Font Awesome -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -23,7 +26,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
   <style>
-    html, body {
+    html,
+    body {
       height: 100%;
       margin: 0;
       background-color: #1f2937; /* donkergrijs */
@@ -39,9 +43,9 @@
       width: 100%;
       height: 100%;
       border: none;
-      background-color: #1e293b;
+      background-color: #111827;
     }
-    /* File Tree */
+    /* Sidebar (file tree) */
     #fileTree {
       width: 260px;
       overflow-y: auto;
@@ -52,6 +56,7 @@
     #fileTree ul {
       list-style: none;
       padding-left: 0.5rem;
+      margin: 0;
     }
     #fileTree li {
       padding: 0.4rem 0.6rem;
@@ -62,27 +67,37 @@
     }
     #fileTree li:hover {
       background: #374151;
-      cursor: pointer;
+      cursor: grab;
     }
-    /* Chevron-rotatie */
+    #fileTree li.drag-over {
+      background: #065f46; /* accentkleur licht variant */
+    }
+    /* Chevron rotatie */
     .chevron {
       transition: transform 0.2s ease-in-out;
+      font-size: 0.75rem;
+      margin-right: 0.5rem;
+      visibility: hidden;
     }
-    .chevron.rotate {
+    .rotate {
       transform: rotate(90deg);
     }
     /* Spinner */
     .spinner {
       border: 8px solid rgba(255, 255, 255, 0.1);
-      border-top: 8px solid #3b82f6;
+      border-top: 8px solid #14b8a6; /* accent teal */
       border-radius: 50%;
       width: 60px;
       height: 60px;
       animation: spin 1s linear infinite;
     }
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
     #loadingOverlay {
       position: absolute;
@@ -96,7 +111,7 @@
       align-items: center;
       z-index: 100;
     }
-    /* Toolbar Buttons */
+    /* Toolbar knoppen met accentkleur (teal) */
     .toolbar-button {
       display: flex;
       align-items: center;
@@ -105,7 +120,12 @@
       margin-right: 0.5rem;
       border-radius: 0.375rem;
       font-size: 0.875rem;
+      background-color: #14b8a6; /* accent teal */
+      color: #f9fafb;
       transition: background-color 0.2s;
+    }
+    .toolbar-button:hover {
+      background-color: #0e7968; /* donkerder teal bij hover */
     }
     .toolbar-button i {
       margin-right: 0.5rem;
@@ -113,29 +133,28 @@
   </style>
 </head>
 <body class="flex flex-col h-screen">
-
-  <!-- Loading Spinner -->
+  <!-- Laad-overlay -->
   <div id="loadingOverlay">
     <div class="spinner"></div>
   </div>
 
   <!-- Toolbar -->
   <div class="flex items-center p-3 bg-gray-800 text-white">
-    <button id="openBtn" class="toolbar-button bg-blue-600 hover:bg-blue-700" disabled>
+    <button id="openBtn" class="toolbar-button" disabled>
       <i class="fas fa-folder-open"></i>Open Map
     </button>
-    <button id="newFolderBtn" class="toolbar-button bg-indigo-600 hover:bg-indigo-700" disabled>
+    <button id="newFolderBtn" class="toolbar-button" disabled>
       <i class="fas fa-folder-plus"></i>Nieuwe Map
     </button>
-    <button id="newFileBtn" class="toolbar-button bg-yellow-600 hover:bg-yellow-700" disabled>
+    <button id="newFileBtn" class="toolbar-button" disabled>
       <i class="fas fa-file-circle-plus"></i>Nieuw Bestand
     </button>
-    <button id="saveBtn" class="toolbar-button bg-green-600 hover:bg-green-700" disabled>
+    <button id="saveBtn" class="toolbar-button ml-auto" disabled>
       <i class="fas fa-save"></i>Opslaan
     </button>
   </div>
 
-  <!-- Hoofdcontainer: FileTree | Editor | Preview -->
+  <!-- Hoofdcontainer -->
   <div class="flex flex-1 overflow-hidden">
     <!-- File Tree Sidebar -->
     <div id="fileTree"></div>
@@ -151,7 +170,7 @@
     let currentDirHandle = null;
     let autosaveInterval;
 
-    // Initialize Monaco Editor
+    // Monaco Editor initialiseren
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
     require(["vs/editor/editor.main"], function () {
       editor = monaco.editor.create(document.getElementById('editor'), {
@@ -160,33 +179,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Example</title>
+  <title>Webitz</title>
   <style>
     body { font-family: sans-serif; background: #1e293b; color: #e5e7eb; }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center; margin-top:2rem;">Webitz Preview 😎</h1>
+  <h1 style="text-align:center; margin-top:2rem;">Webitz Preview</h1>
 </body>
 </html>`,
         language: 'html',
-        theme: 'vs-dark'
+        theme: 'vs-dark',
       });
 
       editor.onDidChangeModelContent(() => updatePreview());
       updatePreview();
 
-      // Hide loading overlay
+      // Verberg loading overlay als editor klaar is
       document.getElementById('loadingOverlay').style.display = 'none';
 
-      // Activeer FS API-buttons als mogelijk
+      // Activeer knoppen als FS API beschikbaar is
       if ('showDirectoryPicker' in window) {
         document.getElementById('openBtn').disabled = false;
         document.getElementById('newFolderBtn').disabled = false;
         document.getElementById('newFileBtn').disabled = false;
       }
 
-      // Autosave elke 30s als er een file open is
+      // Autosave elke 30 seconden
       autosaveInterval = setInterval(() => {
         if (currentHandle) saveFile();
       }, 30000);
@@ -200,7 +219,7 @@
       });
     });
 
-    // Update de live preview
+    // Live preview updaten
     function updatePreview() {
       const iframe = document.getElementById('preview');
       const doc = iframe.contentWindow.document;
@@ -211,10 +230,7 @@
 
       doc.open();
       if (ext === 'txt' || ext === 'md') {
-        const escaped = code
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;');
+        const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         doc.write(`<pre style="color:#f3f4f6; background:#1e293b; padding:1rem;">${escaped}</pre>`);
       } else {
         doc.write(code);
@@ -222,21 +238,21 @@
       doc.close();
     }
 
-    // Save knop
+    // Bestand opslaan
     async function saveFile() {
       try {
         if (!currentHandle) return;
         const writable = await currentHandle.createWritable();
         await writable.write(editor.getValue());
         await writable.close();
-        console.log("Saved: ", currentHandle.name);
+        console.log("Saved:", currentHandle.name);
       } catch (err) {
-        console.error("Save failed", err);
+        console.error("Opslaan mislukt", err);
         alert("Opslaan mislukt. Controleer of je browser dit ondersteunt.");
       }
     }
 
-    // “Open Map” knop
+    // “Open Map”-knop
     document.getElementById('openBtn').addEventListener('click', async () => {
       try {
         currentDirHandle = await window.showDirectoryPicker();
@@ -249,7 +265,7 @@
       }
     });
 
-    // “Nieuwe Map” knop
+    // “Nieuwe Map”-knop
     document.getElementById('newFolderBtn').addEventListener('click', async () => {
       if (!currentDirHandle) return alert("Open eerst een map om een nieuwe map te maken.");
       const folderName = prompt("Naam nieuwe map:");
@@ -263,7 +279,7 @@
       }
     });
 
-    // “Nieuw Bestand” knop
+    // “Nieuw Bestand”-knop
     document.getElementById('newFileBtn').addEventListener('click', async () => {
       if (!currentDirHandle) return alert("Open eerst een map om een nieuw bestand te maken.");
       const fileName = prompt("Bestandsnaam (inclusief extensie):");
@@ -271,7 +287,7 @@
       try {
         const newHandle = await currentDirHandle.getFileHandle(fileName, { create: true });
         await refreshTree();
-        // Open automatisch het nieuwe bestand
+        // Open direct het nieuwe bestand
         const file = await newHandle.getFile();
         const text = await file.text();
         editor.setValue(text);
@@ -282,38 +298,57 @@
       }
     });
 
-    // Klik op de “Opslaan” knop
+    // “Opslaan”-knop
     document.getElementById('saveBtn').addEventListener('click', saveFile);
 
     const fileTree = document.getElementById("fileTree");
+    let draggedHandle = null;
+    let draggedKind = null;
 
-    // Recursieve functie om entries te tonen
+    // Recursief entries tonen inclusief drag-&-drop
     async function listEntries(dirHandle, container) {
       container.innerHTML = '<ul class="space-y-1"></ul>';
       const ul = container.querySelector('ul');
 
       for await (const entry of dirHandle.values()) {
         const li = document.createElement('li');
-        li.classList.add("pl-2", "py-1", "rounded", "hover:bg-gray-700", "transition-colors", "duration-200");
+        li.classList.add("rounded", "hover:bg-gray-700", "transition-colors", "duration-200", "relative");
         li.style.display = "flex";
         li.style.alignItems = "center";
+        li.setAttribute('draggable', true);
 
-        // Chevron (voor mappen)
+        // Chevron icoontje (alleen zichtbaar bij map)
         const chevron = document.createElement('i');
-        chevron.className = 'fas fa-chevron-right text-xs chevron mr-2';
-        chevron.style.visibility = entry.kind === 'directory' ? 'visible' : 'hidden';
+        chevron.className = 'fas fa-chevron-right chevron text-gray-400';
+        if (entry.kind === 'directory') {
+          chevron.style.visibility = 'visible';
+        }
+        li.appendChild(chevron);
 
-        // Folder/file icoon
+        // Map of bestand icoon
         const icon = document.createElement('i');
-        icon.className = entry.kind === 'file' ? 'fas fa-file text-sm mr-2' : 'fas fa-folder text-sm mr-2';
+        icon.className = entry.kind === 'file' ? 'fas fa-file text-gray-300 mr-2' : 'fas fa-folder text-yellow-400 mr-2';
+        li.appendChild(icon);
 
+        // Naam
         const nameSpan = document.createElement('span');
         nameSpan.textContent = entry.name;
         nameSpan.classList.add("text-sm", "flex-1");
-
-        li.appendChild(chevron);
-        li.appendChild(icon);
         li.appendChild(nameSpan);
+
+        // Drag events
+        li.addEventListener('dragstart', (e) => {
+          draggedHandle = entry;
+          draggedKind = entry.kind;
+          e.dataTransfer.setData('text/plain', entry.name);
+          // lichte transparantie tijdens slepen
+          li.classList.add('opacity-50');
+        });
+        li.addEventListener('dragend', () => {
+          draggedHandle = null;
+          draggedKind = null;
+          li.classList.remove('opacity-50');
+        });
 
         if (entry.kind === 'file') {
           // Open bestand bij klik
@@ -324,13 +359,13 @@
             currentHandle = entry;
           });
         } else if (entry.kind === 'directory') {
-          // Sublist voor nested inhoud
+          // Container voor geneste inhoud
           let expanded = false;
           const sublist = document.createElement('ul');
           sublist.classList.add('pl-6', 'hidden', 'space-y-1');
-
           li.appendChild(sublist);
 
+          // Klik om in/uit te vouwen
           li.addEventListener('click', async (e) => {
             e.stopPropagation();
             if (!expanded) {
@@ -343,36 +378,90 @@
             }
             expanded = !expanded;
           });
+
+          // Drop target voor drag‐&‐drop
+          li.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            li.classList.add('drag-over');
+          });
+          li.addEventListener('dragleave', () => {
+            li.classList.remove('drag-over');
+          });
+          li.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            li.classList.remove('drag-over');
+            if (draggedHandle && draggedKind === 'file') {
+              // Sleep een bestand in deze map
+              try {
+                // Lees het bestand
+                const file = await draggedHandle.getFile();
+                const content = await file.text();
+                // Maak een nieuw bestand in de doelmap
+                const targetDir = entry;
+                await targetDir.getFileHandle(draggedHandle.name, { create: true })
+                  .then(async (newHandle) => {
+                    const writable = await newHandle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                  });
+                // Verwijder oud bestand (optioneel, afhankelijk van browser-ondersteuning)
+                if (draggedHandle.requestPermission) {
+                  const parent = currentDirHandle || dirHandle;
+                  if (parent.removeEntry) {
+                    await parent.removeEntry(draggedHandle.name);
+                  }
+                }
+                await refreshTree();
+              } catch (err) {
+                console.error("Verplaatsen bestand mislukt:", err);
+                alert("Verplaatsen van bestand is niet toegestaan in jouw browser.");
+              }
+            }
+          });
         }
 
         ul.appendChild(li);
       }
     }
 
-    // Functie om subdirectory-inhoud te vullen
+    // Subdirectory vullen
     async function populateSubdirectory(dirHandle, sublist) {
       sublist.innerHTML = '';
       for await (const entry of dirHandle.values()) {
         const li = document.createElement('li');
-        li.classList.add("pl-2", "py-1", "rounded", "hover:bg-gray-700", "transition-colors", "duration-200");
+        li.classList.add("rounded", "hover:bg-gray-700", "transition-colors", "duration-200", "relative");
         li.style.display = "flex";
         li.style.alignItems = "center";
+        li.setAttribute('draggable', true);
 
-        // Chevron voor nóg een level diepte
         const chevron = document.createElement('i');
-        chevron.className = 'fas fa-chevron-right text-xs chevron mr-2';
-        chevron.style.visibility = entry.kind === 'directory' ? 'visible' : 'hidden';
+        chevron.className = 'fas fa-chevron-right chevron text-gray-400';
+        if (entry.kind === 'directory') {
+          chevron.style.visibility = 'visible';
+        }
+        li.appendChild(chevron);
 
         const icon = document.createElement('i');
-        icon.className = entry.kind === 'file' ? 'fas fa-file text-sm mr-2' : 'fas fa-folder text-sm mr-2';
+        icon.className = entry.kind === 'file' ? 'fas fa-file text-gray-300 mr-2' : 'fas fa-folder text-yellow-400 mr-2';
+        li.appendChild(icon);
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = entry.name;
         nameSpan.classList.add("text-sm", "flex-1");
-
-        li.appendChild(chevron);
-        li.appendChild(icon);
         li.appendChild(nameSpan);
+
+        // Drag‐&‐drop events
+        li.addEventListener('dragstart', (e) => {
+          draggedHandle = entry;
+          draggedKind = entry.kind;
+          e.dataTransfer.setData('text/plain', entry.name);
+          li.classList.add('opacity-50');
+        });
+        li.addEventListener('dragend', () => {
+          draggedHandle = null;
+          draggedKind = null;
+          li.classList.remove('opacity-50');
+        });
 
         if (entry.kind === 'file') {
           li.addEventListener('click', async (e) => {
@@ -400,13 +489,47 @@
             }
             expanded = !expanded;
           });
+
+          li.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            li.classList.add('drag-over');
+          });
+          li.addEventListener('dragleave', () => {
+            li.classList.remove('drag-over');
+          });
+          li.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            li.classList.remove('drag-over');
+            if (draggedHandle && draggedKind === 'file') {
+              try {
+                const file = await draggedHandle.getFile();
+                const content = await file.text();
+                const targetDir = entry;
+                await targetDir.getFileHandle(draggedHandle.name, { create: true })
+                  .then(async (newHandle) => {
+                    const writable = await newHandle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                  });
+                if (draggedHandle.requestPermission) {
+                  if (currentDirHandle.removeEntry) {
+                    await currentDirHandle.removeEntry(draggedHandle.name);
+                  }
+                }
+                await refreshTree();
+              } catch (err) {
+                console.error("Verplaatsen bestand mislukt:", err);
+                alert("Verplaatsen van bestand is niet toegestaan in jouw browser.");
+              }
+            }
+          });
         }
 
         sublist.appendChild(li);
       }
     }
 
-    // Vernieuw de file tree (vb. na nieuwe map/bestand)
+    // Vernieuw file tree
     async function refreshTree() {
       if (currentDirHandle) {
         fileTree.innerHTML = '';
