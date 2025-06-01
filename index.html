@@ -70,7 +70,7 @@
       cursor: grab;
     }
     #fileTree li.drag-over {
-      background: #065f46; /* accentkleur lichte variant */
+      background: #065f46; /* accentkleur licht variant */
     }
     /* Chevron rotatie */
     .chevron {
@@ -189,7 +189,7 @@
 </body>
 </html>`,
         language: 'html',
-        theme: 'vs-dark'
+        theme: 'vs-dark',
       });
 
       editor.onDidChangeModelContent(() => updatePreview());
@@ -230,10 +230,7 @@
 
       doc.open();
       if (ext === 'txt' || ext === 'md') {
-        const escaped = code
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;');
+        const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         doc.write(`<pre style="color:#f3f4f6; background:#1e293b; padding:1rem;">${escaped}</pre>`);
       } else {
         doc.write(code);
@@ -344,6 +341,7 @@
           draggedHandle = entry;
           draggedKind = entry.kind;
           e.dataTransfer.setData('text/plain', entry.name);
+          // lichte transparantie tijdens slepen
           li.classList.add('opacity-50');
         });
         li.addEventListener('dragend', () => {
@@ -367,7 +365,7 @@
           sublist.classList.add('pl-6', 'hidden', 'space-y-1');
           li.appendChild(sublist);
 
-          // Klik om uit-/inklappen
+          // Klik om in/uit te vouwen
           li.addEventListener('click', async (e) => {
             e.stopPropagation();
             if (!expanded) {
@@ -381,7 +379,7 @@
             expanded = !expanded;
           });
 
-          // Drop target (drag-over & drop)
+          // Drop target voor drag‐&‐drop
           li.addEventListener('dragover', (e) => {
             e.preventDefault();
             li.classList.add('drag-over');
@@ -392,24 +390,31 @@
           li.addEventListener('drop', async (e) => {
             e.preventDefault();
             li.classList.remove('drag-over');
-            // Enkel bestanden kopiëren, niet mappen
             if (draggedHandle && draggedKind === 'file') {
+              // Sleep een bestand in deze map
               try {
                 // Lees het bestand
                 const file = await draggedHandle.getFile();
                 const content = await file.text();
                 // Maak een nieuw bestand in de doelmap
                 const targetDir = entry;
-                const newHandle = await targetDir.getFileHandle(draggedHandle.name, { create: true });
-                const writable = await newHandle.createWritable();
-                await writable.write(content);
-                await writable.close();
-                // Laat gebruiker weten dat hij/zij het origineel zelf kan verwijderen
-                alert(`Bestand "${draggedHandle.name}" is gekopieerd naar map "${entry.name}".\n\nVerwijder het originele bestand handmatig als je net zo netjes wilt opruimen! 🧹`);
+                await targetDir.getFileHandle(draggedHandle.name, { create: true })
+                  .then(async (newHandle) => {
+                    const writable = await newHandle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                  });
+                // Verwijder oud bestand (optioneel, afhankelijk van browser-ondersteuning)
+                if (draggedHandle.requestPermission) {
+                  const parent = currentDirHandle || dirHandle;
+                  if (parent.removeEntry) {
+                    await parent.removeEntry(draggedHandle.name);
+                  }
+                }
                 await refreshTree();
               } catch (err) {
-                console.error("Kopiëren bestand mislukt:", err);
-                alert("Kopiëren van bestand is niet toegestaan in jouw browser.");
+                console.error("Verplaatsen bestand mislukt:", err);
+                alert("Verplaatsen van bestand is niet toegestaan in jouw browser.");
               }
             }
           });
@@ -419,7 +424,7 @@
       }
     }
 
-    // Subdirectory vullen met drag-&-drop
+    // Subdirectory vullen
     async function populateSubdirectory(dirHandle, sublist) {
       sublist.innerHTML = '';
       for await (const entry of dirHandle.values()) {
@@ -445,7 +450,7 @@
         nameSpan.classList.add("text-sm", "flex-1");
         li.appendChild(nameSpan);
 
-        // Drag & Drop events
+        // Drag‐&‐drop events
         li.addEventListener('dragstart', (e) => {
           draggedHandle = entry;
           draggedKind = entry.kind;
@@ -500,15 +505,21 @@
                 const file = await draggedHandle.getFile();
                 const content = await file.text();
                 const targetDir = entry;
-                const newHandle = await targetDir.getFileHandle(draggedHandle.name, { create: true });
-                const writable = await newHandle.createWritable();
-                await writable.write(content);
-                await writable.close();
-                alert(`Bestand "${draggedHandle.name}" is gekopieerd naar map "${entry.name}".\n\nVerwijder het originele bestand handmatig als je wilt opruimen! 🧹`);
+                await targetDir.getFileHandle(draggedHandle.name, { create: true })
+                  .then(async (newHandle) => {
+                    const writable = await newHandle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                  });
+                if (draggedHandle.requestPermission) {
+                  if (currentDirHandle.removeEntry) {
+                    await currentDirHandle.removeEntry(draggedHandle.name);
+                  }
+                }
                 await refreshTree();
               } catch (err) {
-                console.error("Kopiëren bestand mislukt:", err);
-                alert("Kopiëren van bestand is niet toegestaan in jouw browser.");
+                console.error("Verplaatsen bestand mislukt:", err);
+                alert("Verplaatsen van bestand is niet toegestaan in jouw browser.");
               }
             }
           });
