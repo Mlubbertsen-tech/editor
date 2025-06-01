@@ -23,6 +23,15 @@
       border: none;
       background-color: white;
     }
+    #fileTree {
+      width: 200px;
+      overflow-y: auto;
+      background: #2e2e2e;
+      color: white;
+      padding: 0.5rem;
+    }
+    #fileTree ul { list-style: none; padding-left: 1rem; }
+    #fileTree li:hover { background: #3e3e3e; cursor: pointer; }
   </style>
 </head>
 <body class="flex flex-col h-screen">
@@ -32,12 +41,15 @@
     <button id="darkModeToggle" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded">🌙 Dark Mode</button>
   </div>
   <div class="flex flex-1 overflow-hidden">
+    <div id="fileTree"></div>
     <div id="editor" class="w-1/2"></div>
     <iframe id="preview" class="w-1/2 bg-white"></iframe>
   </div>
 
   <script>
     let editor;
+    let currentHandle = null;
+
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
     require(["vs/editor/editor.main"], function () {
       editor = monaco.editor.create(document.getElementById('editor'), {
@@ -67,40 +79,60 @@
       doc.close();
     }
 
-    // Controleer of File System Access API beschikbaar is
-    const canUseFileSystemAPI = 'showOpenFilePicker' in window && 'showSaveFilePicker' in window;
+    const fileTree = document.getElementById("fileTree");
+
+    // File System Access API functionaliteit
+    const canUseFileSystemAPI = 'showDirectoryPicker' in window;
     if (canUseFileSystemAPI) {
       document.getElementById('openBtn').disabled = false;
       document.getElementById('saveBtn').disabled = false;
 
-      // Bestand openen via File System Access API
       document.getElementById('openBtn').addEventListener('click', async () => {
         try {
-          const [fileHandle] = await window.showOpenFilePicker();
-          const file = await fileHandle.getFile();
-          const text = await file.text();
-          editor.setValue(text);
+          const dirHandle = await window.showDirectoryPicker();
+          fileTree.innerHTML = '';
+          await listFiles(dirHandle, fileTree);
         } catch (err) {
-          console.error("Open canceled or failed", err);
-          alert("Bestand openen mislukt of geannuleerd. Zorg dat je browser deze functie ondersteunt.");
+          console.error("Directory open failed", err);
+          alert("Map openen mislukt of geannuleerd.");
         }
       });
 
-      // Bestand opslaan via File System Access API
       document.getElementById('saveBtn').addEventListener('click', async () => {
         try {
-          const handle = await window.showSaveFilePicker();
-          const writable = await handle.createWritable();
+          if (!currentHandle) return alert("Geen bestand geselecteerd!");
+          const writable = await currentHandle.createWritable();
           await writable.write(editor.getValue());
           await writable.close();
         } catch (err) {
           console.error("Save canceled or failed", err);
-          alert("Bestand opslaan mislukt of geannuleerd. Zorg dat je browser deze functie ondersteunt.");
+          alert("Bestand opslaan mislukt of geannuleerd.");
         }
       });
     }
 
-    // Donkere modus toggle
+    async function listFiles(dirHandle, container) {
+      container.innerHTML = '<ul></ul>';
+      const ul = container.querySelector('ul');
+      for await (const entry of dirHandle.values()) {
+        const li = document.createElement('li');
+        li.textContent = entry.name;
+        li.classList.add("px-2", "py-1");
+
+        if (entry.kind === 'file') {
+          li.addEventListener('click', async () => {
+            const file = await entry.getFile();
+            const text = await file.text();
+            editor.setValue(text);
+            currentHandle = entry;
+          });
+        } else if (entry.kind === 'directory') {
+          li.innerHTML = `📁 ${entry.name}`;
+        }
+        ul.appendChild(li);
+      }
+    }
+
     document.getElementById('darkModeToggle').addEventListener('click', () => {
       const newTheme = monaco.editor.getTheme() === 'vs-dark' ? 'vs-light' : 'vs-dark';
       monaco.editor.setTheme(newTheme);
