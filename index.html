@@ -494,50 +494,43 @@
                 base: 'vs-dark',
                 inherit: true,
                 rules: [
-                    { token: 'keyword', foreground: '#CCCCCC', fontStyle: 'bold' }, // Lichtgrijs keywords
-                    { token: 'identifier', foreground: '#AAAAAA' }, // Medium grijs identifiers
-                    { token: 'string', foreground: '#999999' }, // Donkergrijs strings
-                    { token: 'number', foreground: '#BBBBBB' }, // Lichtgrijs nummers
-                    { token: 'comment', foreground: '#666666', fontStyle: 'italic' }, // Donkergrijs commentaar
-                    { token: 'type', foreground: '#888888' }, // Types donkergrijs
-                    { token: 'function', foreground: '#CCCCCC' }, // Functies lichtgrijs
-                    { token: 'variable', foreground: '#AAAAAA' }, // Variabelen medium grijs
-                    { token: 'delimiter', foreground: '#FFFFFF' }, // Haakjes en delimiters wit
-                    { token: 'operators', foreground: '#CCCCCC' }, // Operatoren lichtgrijs
-                    { token: 'tag', foreground: '#BBBBBB' }, // Tags lichtgrijs
-                    { token: 'attribute.name', foreground: '#999999' }, // Attribuutnamen donkergrijs
-                    { token: 'attribute.value', foreground: '#999999' }, // Attribuutwaarden donkergrijs
-                    { token: 'metatag', foreground: '#777777' }, // Metatags donkergrijs
-
-                    // Extra tokens voor CSS en eenheden
-                    { token: 'delimiter.bracket', foreground: '#FFFFFF' }, // {} haakjes wit
-                    { token: 'unit', foreground: '#AAAAAA' }, // px, em, %, rem etc medium grijs
-                    { token: 'color.rgb', foreground: '#AAAAAA' }, // rgb(), rgba() medium grijs
-                    { token: 'color.hex', foreground: '#AAAAAA' }, // Hex kleuren medium grijs
-                    { token: 'css.property', foreground: '#CCCCCC' }, // CSS properties lichtgrijs
-                    { token: 'css.value', foreground: '#999999' }, // CSS values donkergrijs
+                    { token: 'keyword', foreground: '#FFD700', fontStyle: 'bold' },        // Goud (geel)
+                    { token: 'identifier', foreground: '#FFFFE0' },                        // Lichtgeel (veiliger dan cyaan)
+                    { token: 'string', foreground: '#F0E68C' },                            // Khaki (lichtgeelachtig)
+                    { token: 'number', foreground: '#FFEB3B' },                            // Helder geel, maar niet fel
+                    { token: 'comment', foreground: '#AAAAAA', fontStyle: 'italic' },      // Grijs, iets lichter dan #808080
+                    { token: 'type', foreground: '#FFFF00' },                              // Fel geel
+                    { token: 'function', foreground: '#FFD700' },                          // Goud
+                    { token: 'variable', foreground: '#F5F5DC' },                          // Beige (licht witgeel)
+                    { token: 'delimiter', foreground: '#FFFFFF' },                         // Wit
+                    { token: 'operators', foreground: '#FFA500' },                         // Oranje-geel (veiliger dan fel oranje)
+                    { token: 'tag', foreground: '#FFD700' },                               // Goud
+                    { token: 'attribute.name', foreground: '#FFFFE0' },                    // Lichtgeel
+                    { token: 'attribute.value', foreground: '#F0E68C' },                   // Khaki
+                    { token: 'metatag', foreground: '#FFFF00' },                           // Fel geel
                 ],
                 colors: {
-                    'editor.background': '#121212',
-                    'editor.foreground': '#E0E0E0',
-                    'editorCursor.foreground': '#FFFFFF',
-                    'editor.lineHighlightBackground': '#222222',
-                    'editorLineNumber.foreground': '#555555',
-                    'editor.selectionBackground': '#444444',
-                    'editor.inactiveSelectionBackground': '#333333',
-                    'editorIndentGuide.background': '#444444',
-                    'editorIndentGuide.activeBackground': '#777777',
-                    'editorOverviewRuler.border': '#333333',
+                    'editor.background': '#000000',              // Zwart voor maximale contrast
+                    'editor.foreground': '#FFFFFF',              // Wit
+                    'editorCursor.foreground': '#FFFF00',        // Geel cursor voor opvallen
+                    'editor.lineHighlightBackground': '#222200', // Donker geel/zwart mix
+                    'editorLineNumber.foreground': '#AAAAAA',    // Lichtgrijs
+                    'editor.selectionBackground': '#555500',     // Donker geel selectiekleur
+                    'editor.inactiveSelectionBackground': '#333300', // Nog donkerder geel/zwart
+                    'editorIndentGuide.background': '#444400',   // Donker geel/zwart
+                    'editorIndentGuide.activeBackground': '#AAAA00', // Lichter geel
+                    'editorOverviewRuler.border': '#222200',     // Donker geel/zwart
+                    'editor.findMatchBackground': '#FFFF0066',   // Doorzichtig geel
+                    'editor.findMatchHighlightBackground': '#FFFF0099', // Helderder doorzichtig geel
 
-                    'editor.findMatchBackground': '#66666666',
-                    'editor.findMatchHighlightBackground': '#66666699',
-
+                    // Scrollbar kleuren
                     'scrollbar.shadow': '#000000',
-                    'scrollbarSlider.background': '#4A4A4A',
-                    'scrollbarSlider.hoverBackground': '#5A5A5A',
-                    'scrollbarSlider.activeBackground': '#6A6A6A',
+                    'scrollbarSlider.background': '#333300',
+                    'scrollbarSlider.hoverBackground': '#555500',
+                    'scrollbarSlider.activeBackground': '#777700',
                 }
             });
+
 
 
             // Create editor with custom theme
