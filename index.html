@@ -457,29 +457,91 @@
     require(["vs/editor/editor.main"], function () {
       window.monaco = monaco;
       // Define custom theme
+      // monaco.editor.defineTheme('webitztheme', {
+      //   base: 'vs-dark',
+      //   inherit: true,
+      //   rules: [
+      //     { token: '', foreground: '#ffffff' },
+      //     { token: 'comment', foreground: '#888888' },
+      //     { token: 'keyword', foreground: '#ffffff', fontStyle: 'bold' },
+      //     { token: 'identifier', foreground: '#ffffff' },
+      //     { token: 'string', foreground: '#dddddd' },
+      //     { token: 'number', foreground: '#ffffff' },
+      //   ],
+      //   colors: {
+      //     'editor.background': '#000000',
+      //     'editor.foreground': '#ffffff',
+      //     'editorCursor.foreground': '#ffffff',
+      //     'editor.lineHighlightBackground': '#111111',
+      //     'editorLineNumber.foreground': '#555555',
+      //     'editor.selectionBackground': '#333333',
+      //     'editor.inactiveSelectionBackground': '#222222',
+      //     'editorIndentGuide.background': '#333333',
+      //     'editorIndentGuide.activeBackground': '#666666',
+      //   }
+      // });
+
       monaco.editor.defineTheme('webitztheme', {
-        base: 'vs-dark',
-        inherit: true,
-        rules: [
-          { token: '', foreground: '#ffffff' },
-          { token: 'comment', foreground: '#888888' },
-          { token: 'keyword', foreground: '#ffffff', fontStyle: 'bold' },
-          { token: 'identifier', foreground: '#ffffff' },
-          { token: 'string', foreground: '#dddddd' },
-          { token: 'number', foreground: '#ffffff' },
-        ],
-        colors: {
-          'editor.background': '#000000',
-          'editor.foreground': '#ffffff',
-          'editorCursor.foreground': '#ffffff',
-          'editor.lineHighlightBackground': '#111111',
-          'editorLineNumber.foreground': '#555555',
-          'editor.selectionBackground': '#333333',
-          'editor.inactiveSelectionBackground': '#222222',
-          'editorIndentGuide.background': '#333333',
-          'editorIndentGuide.activeBackground': '#666666',
-        }
-      });
+  base: 'vs-dark', // Begin met het standaard donkere VS Code thema
+  inherit: true,   // Erf alle niet-gedefinieerde regels van 'vs-dark'
+  rules: [
+    // Algemene tekst en achtergrond worden nog steeds gedekt door 'vs-dark',
+    // maar we kunnen hier specifiekere overschrijvingen doen.
+
+    // Heldere, opvallende kleuren voor belangrijke elementen
+    { token: 'keyword',        foreground: '#FFD700', fontStyle: 'bold' }, // Goud voor keywords
+    { token: 'identifier',     foreground: '#00FFFF' }, // Cyaan voor identifiers (variabelen, functienamen)
+    { token: 'string',         foreground: '#98FB98' }, // Lichtgroen voor strings
+    { token: 'number',         foreground: '#FF69B4' }, // Roze voor nummers
+    { token: 'comment',        foreground: '#808080', fontStyle: 'italic' }, // Grijze, cursieve commentaren
+
+    // Andere veelvoorkomende tokens
+    { token: 'type',           foreground: '#ADD8E6' }, // Lichtblauw voor types (bijv. in TypeScript)
+    { token: 'function',       foreground: '#FF6347' }, // Tomaatrood voor functiedeclaties
+    { token: 'variable',       foreground: '#FFA07A' }, // Licht zalmroze voor variabelen
+    { token: 'delimiter',      foreground: '#FFFFFF' }, // Wit voor delimiters (haakjes, accolades, etc.)
+    { token: 'operators',      foreground: '#FF4500' }, // Oranje rood voor operatoren
+    { token: 'tag',            foreground: '#FFD700' }, // Goud voor HTML/XML tags
+    { token: 'attribute.name', foreground: '#00BFFF' }, // Diep hemelsblauw voor HTML/XML attribuutnamen
+    { token: 'attribute.value', foreground: '#98FB98' }, // Lichtgroen voor HTML/XML attribuutwaarden
+    { token: 'metatag',        foreground: '#DA70D6' }, // Orchidee voor meta tags (bijv. PHP, ASP)
+  ],
+  colors: {
+    // Overrides voor de algemene editor-UI kleuren
+    'editor.background':                 '#1A1A1A', // Zeer donkergrijs/bijna zwart
+    'editor.foreground':                 '#F8F8F2', // Algemene tekstkleur, bijna wit
+    'editorCursor.foreground':           '#FFFFFF', // Witte cursor
+    'editor.lineHighlightBackground':    '#2A2A2A', // Donkerdere achtergrond voor de huidige lijn
+    'editorLineNumber.foreground':       '#555555', // Donkergrijs voor lijnnummers
+    'editor.selectionBackground':        '#4A4A4A', // Donkerdere selectie achtergrond
+    'editor.inactiveSelectionBackground':'#3A3A3A', // Nog donkerdere inactieve selectie
+    'editorIndentGuide.background':      '#444444', // Donkerdere indentatie hulplijnen
+    'editorIndentGuide.activeBackground':'#777777', // Actieve indentatie hulplijnen
+    'editorOverviewRuler.border':        '#333333', // Rand van de overzichtsliniaal
+    'editor.findMatchBackground':        '#FFD70066', // Goudkleurige achtergrond voor zoekresultaten (met transparantie)
+    'editor.findMatchHighlightBackground': '#FFD70099', // Helderdere highlight voor huidige zoekresultaat
+
+    // Scrollbar kleuren
+    'scrollbar.shadow':                  '#000000',
+    'scrollbarSlider.background':        '#4A4A4A',
+    'scrollbarSlider.hoverBackground':   '#5A5A5A',
+    'scrollbarSlider.activeBackground':  '#6A6A6A',
+  }
+});
+
+// Zorg ervoor dat je editor wordt geïnstantieerd met dit thema, bijv.:
+// editor = monaco.editor.create(document.getElementById('editor'), {
+//   value: `... je code hier ...`,
+//   language: 'html', // of 'javascript', 'css'
+//   theme: 'brightDarkTheme',
+//   automaticLayout: true,
+//   minimap: { enabled: true },
+//   fontSize: 14,
+//   scrollBeyondLastLine: false
+// });
+
+// En als je het thema later wilt wisselen:
+// monaco.editor.setTheme('brightDarkTheme');
 
       // Create editor with custom theme
       editor = monaco.editor.create(document.getElementById('editor'), {
