@@ -494,39 +494,44 @@
                 base: 'vs-dark',
                 inherit: true,
                 rules: [
-                    { token: 'keyword', foreground: '#CCCCCC', fontStyle: 'bold' }, // Lichtgrijs voor keywords
-                    { token: 'identifier', foreground: '#AAAAAA' }, // Medium grijs voor identifiers
-                    { token: 'string', foreground: '#999999' }, // Iets donkerder grijs voor strings
-                    { token: 'number', foreground: '#BBBBBB' }, // Lichtgrijs voor nummers
-                    { token: 'comment', foreground: '#666666', fontStyle: 'italic' }, // Donkergrijs cursief voor commentaar
+                    { token: 'keyword', foreground: '#CCCCCC', fontStyle: 'bold' }, // Lichtgrijs keywords
+                    { token: 'identifier', foreground: '#AAAAAA' }, // Medium grijs identifiers
+                    { token: 'string', foreground: '#999999' }, // Donkergrijs strings
+                    { token: 'number', foreground: '#BBBBBB' }, // Lichtgrijs nummers
+                    { token: 'comment', foreground: '#666666', fontStyle: 'italic' }, // Donkergrijs commentaar
+                    { token: 'type', foreground: '#888888' }, // Types donkergrijs
+                    { token: 'function', foreground: '#CCCCCC' }, // Functies lichtgrijs
+                    { token: 'variable', foreground: '#AAAAAA' }, // Variabelen medium grijs
+                    { token: 'delimiter', foreground: '#FFFFFF' }, // Haakjes en delimiters wit
+                    { token: 'operators', foreground: '#CCCCCC' }, // Operatoren lichtgrijs
+                    { token: 'tag', foreground: '#BBBBBB' }, // Tags lichtgrijs
+                    { token: 'attribute.name', foreground: '#999999' }, // Attribuutnamen donkergrijs
+                    { token: 'attribute.value', foreground: '#999999' }, // Attribuutwaarden donkergrijs
+                    { token: 'metatag', foreground: '#777777' }, // Metatags donkergrijs
 
-                    { token: 'type', foreground: '#888888' }, // Medium donkergrijs voor types
-                    { token: 'function', foreground: '#CCCCCC' }, // Lichtgrijs voor functies
-                    { token: 'variable', foreground: '#AAAAAA' }, // Medium grijs voor variabelen
-                    { token: 'delimiter', foreground: '#FFFFFF' }, // Wit voor delimiters
-                    { token: 'operators', foreground: '#CCCCCC' }, // Lichtgrijs voor operatoren
-                    { token: 'tag', foreground: '#BBBBBB' }, // Lichtgrijs voor tags
-                    { token: 'attribute.name', foreground: '#999999' }, // Iets donkerder grijs voor attributen
-                    { token: 'attribute.value', foreground: '#999999' }, // Zelfde voor attribuutwaarden
-                    { token: 'metatag', foreground: '#777777' }, // Donkergrijs voor metatags
+                    // Extra tokens voor CSS en eenheden
+                    { token: 'delimiter.bracket', foreground: '#FFFFFF' }, // {} haakjes wit
+                    { token: 'unit', foreground: '#AAAAAA' }, // px, em, %, rem etc medium grijs
+                    { token: 'color.rgb', foreground: '#AAAAAA' }, // rgb(), rgba() medium grijs
+                    { token: 'color.hex', foreground: '#AAAAAA' }, // Hex kleuren medium grijs
+                    { token: 'css.property', foreground: '#CCCCCC' }, // CSS properties lichtgrijs
+                    { token: 'css.value', foreground: '#999999' }, // CSS values donkergrijs
                 ],
                 colors: {
-                    'editor.background': '#121212', // Bijna zwart
-                    'editor.foreground': '#E0E0E0', // Heel lichtgrijs
-                    'editorCursor.foreground': '#FFFFFF', // Wit
-                    'editor.lineHighlightBackground': '#222222', // Donkergrijs voor lijnhighlight
-                    'editorLineNumber.foreground': '#555555', // Donkergrijs lijnnummers
-                    'editor.selectionBackground': '#444444', // Donkergrijze selectie
-                    'editor.inactiveSelectionBackground': '#333333', // Nog donkerder
-                    'editorIndentGuide.background': '#444444', // Indentatie lijnen donkergrijs
-                    'editorIndentGuide.activeBackground': '#777777', // Actief iets lichter
-                    'editorOverviewRuler.border': '#333333', // Rand grijs
+                    'editor.background': '#121212',
+                    'editor.foreground': '#E0E0E0',
+                    'editorCursor.foreground': '#FFFFFF',
+                    'editor.lineHighlightBackground': '#222222',
+                    'editorLineNumber.foreground': '#555555',
+                    'editor.selectionBackground': '#444444',
+                    'editor.inactiveSelectionBackground': '#333333',
+                    'editorIndentGuide.background': '#444444',
+                    'editorIndentGuide.activeBackground': '#777777',
+                    'editorOverviewRuler.border': '#333333',
 
-                    // Geen geel meer, dus vervangen door transparant grijs
-                    'editor.findMatchBackground': '#66666666', // Transp. donkergrijs voor zoekresultaten
-                    'editor.findMatchHighlightBackground': '#66666699', // Iets minder transparant
+                    'editor.findMatchBackground': '#66666666',
+                    'editor.findMatchHighlightBackground': '#66666699',
 
-                    // Scrollbar kleuren
                     'scrollbar.shadow': '#000000',
                     'scrollbarSlider.background': '#4A4A4A',
                     'scrollbarSlider.hoverBackground': '#5A5A5A',
@@ -534,20 +539,6 @@
                 }
             });
 
-
-            // Zorg ervoor dat je editor wordt geïnstantieerd met dit thema, bijv.:
-            // editor = monaco.editor.create(document.getElementById('editor'), {
-            //   value: `... je code hier ...`,
-            //   language: 'html', // of 'javascript', 'css'
-            //   theme: 'brightDarkTheme',
-            //   automaticLayout: true,
-            //   minimap: { enabled: true },
-            //   fontSize: 14,
-            //   scrollBeyondLastLine: false
-            // });
-
-            // En als je het thema later wilt wisselen:
-            // monaco.editor.setTheme('brightDarkTheme');
 
             // Create editor with custom theme
             editor = monaco.editor.create(document.getElementById('editor'), {
