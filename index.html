@@ -465,31 +465,6 @@
         require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
         require(["vs/editor/editor.main"], function () {
             window.monaco = monaco;
-            // Define custom theme
-            // monaco.editor.defineTheme('webitztheme', {
-            //   base: 'vs-dark',
-            //   inherit: true,
-            //   rules: [
-            //     { token: '', foreground: '#ffffff' },
-            //     { token: 'comment', foreground: '#888888' },
-            //     { token: 'keyword', foreground: '#ffffff', fontStyle: 'bold' },
-            //     { token: 'identifier', foreground: '#ffffff' },
-            //     { token: 'string', foreground: '#dddddd' },
-            //     { token: 'number', foreground: '#ffffff' },
-            //   ],
-            //   colors: {
-            //     'editor.background': '#000000',
-            //     'editor.foreground': '#ffffff',
-            //     'editorCursor.foreground': '#ffffff',
-            //     'editor.lineHighlightBackground': '#111111',
-            //     'editorLineNumber.foreground': '#555555',
-            //     'editor.selectionBackground': '#333333',
-            //     'editor.inactiveSelectionBackground': '#222222',
-            //     'editorIndentGuide.background': '#333333',
-            //     'editorIndentGuide.activeBackground': '#666666',
-            //   }
-            // });
-
             monaco.editor.defineTheme('webitztheme', {
                 base: 'vs-dark',
                 inherit: true,
@@ -511,6 +486,7 @@
                     { token: 'Other', foreground: '#FFFF00' },                             // Fel geel
                 ],
                 colors: {
+                    'text.html.derivative': '#FFFF00',
                     'editor.background': '#000000',              // Zwart voor maximale contrast
                     'editor.foreground': '#FFFFFF',              // Wit
                     'editorCursor.foreground': '#FFFF00',        // Geel cursor voor opvallen
@@ -541,7 +517,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Webitz Project</title>
+  <title>Webitz Example Project</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -595,7 +571,7 @@
 <body>
   <div class="container">
     <h1>Welkom bij Webitz!</h1>
-    <p>Dit is uw nieuwe project. Bewerk deze pagina en zie live veranderingen in de preview.</p>
+    <p>Dit is uw nieuwe project. </br>Bewerk deze pagina en zie live veranderingen in de preview.</p>
     
     <div class="features">
       <div class="feature">
@@ -611,7 +587,7 @@
       <div class="feature">
         <i class="fas fa-folder"></i>
         <h3>Bestandsbeheer</h3>
-        <p>Creëer en beheer bestanden</p>
+        <p>Creëer en beheer lokale bestanden</p>
       </div>
     </div>
   </div>
