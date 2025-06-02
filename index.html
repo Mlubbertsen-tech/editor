@@ -3,165 +3,443 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webitz</title>
-  <!-- Favicon met floppy-disk icoon -->
-<!--   <link
-    rel="icon"
-    href="favicon.ico"
-  /> -->
-  <!-- TailwindCSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-    rel="stylesheet"
-  />
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-p8d/MhYev2xN7SkCTROZjK9gcmG69uNkM9gVuber8rKX3Ef5iaq0JcXNgpUd9NepKiPRIub7aX/4J2Rvk+78A=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-  <!-- Monaco Editor -->
+  <title>Webitz - Web Editor</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-
   <style>
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      background-color: #1f2937; /* donkergrijs */
-      color: #f9fafb;
-      overflow: hidden;
-      font-family: 'Inter', sans-serif;
+    :root {
+      --accent-color: #000000;
+      --accent-dark: #222222;
+      --sidebar-bg: #111111;
+      --editor-bg: #000000;
+      --preview-bg: #111111;
+      --item-hover: #333333;
+      --item-active: #444444;
+      --border-color: #333333;
+      --text-primary: #ffffff;
+      --text-secondary: #cccccc;
+      --toolbar-height: 48px;
+      --statusbar-height: 24px;
+      --sidebar-width: 260px;
     }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      background-color: var(--editor-bg);
+      color: var(--text-primary);
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    /* Toolbar Styling */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      height: var(--toolbar-height);
+      padding: 0 16px;
+      background-color: var(--accent-color);
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    
+    .toolbar-button {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      margin-right: 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      background-color: #333333;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      border: none;
+      outline: none;
+    }
+    
+    .toolbar-button:hover {
+      background-color: var(--item-hover);
+    }
+    
+    .toolbar-button i {
+      margin-right: 6px;
+      font-size: 12px;
+    }
+    
+    .toolbar-button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+    
+    .toolbar-spacer {
+      flex-grow: 1;
+    }
+    
+    /* Main Content Area */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    /* Sidebar Styling */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border-color);
+    }
+    
+    .sidebar-header {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    #fileTree {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+    
+    #fileTree ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    
+    #fileTree li {
+      padding: 4px 16px 4px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.2s;
+      margin: 2px 8px;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    #fileTree li:hover {
+      background: var(--item-hover);
+    }
+    
+    #fileTree li.active {
+      background: var(--item-active);
+    }
+    
+    #fileTree li.drag-over {
+      background: #222222;
+      outline: 1px solid var(--text-primary);
+    }
+    
+    .chevron {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease-in-out;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    
+    .chevron.visible {
+      visibility: visible;
+    }
+    
+    .chevron.rotate {
+      transform: rotate(90deg);
+    }
+    
+    .file-icon {
+      margin-right: 6px;
+      font-size: 16px;
+      color: var(--text-secondary);
+      width: 16px;
+      text-align: center;
+    }
+    
+    .folder-icon {
+      color: var(--text-primary);
+    }
+    
+    .file-name {
+      font-size: 13px;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Editor and Preview Area */
+    .editor-preview-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    .editor-container {
+      flex: 1;
+      position: relative;
+      border-right: 1px solid var(--border-color);
+    }
+    
     #editor {
       height: 100%;
       width: 100%;
     }
-    iframe {
+    
+    .preview-container {
+      flex: 1;
+      position: relative;
+    }
+    
+    #preview {
       width: 100%;
       height: 100%;
       border: none;
-      background-color: #111827;
+      background-color: var(--preview-bg);
     }
-    /* Sidebar (file tree) */
-    #fileTree {
-      width: 260px;
-      overflow-y: auto;
-      background: #111827;
-      color: #f9fafb;
-      padding: 1rem;
-    }
-    #fileTree ul {
-      list-style: none;
-      padding-left: 0.5rem;
-      margin: 0;
-    }
-    #fileTree li {
-      padding: 0.4rem 0.6rem;
-      border-radius: 0.375rem;
+    
+    .preview-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 6px 16px;
+      background-color: rgba(17, 17, 17, 0.9);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
       display: flex;
       align-items: center;
-      transition: background-color 0.2s;
+      z-index: 10;
     }
-    #fileTree li:hover {
-      background: #374151;
-      cursor: grab;
+    
+    .preview-header i {
+      margin-right: 8px;
     }
-    #fileTree li.drag-over {
-      background: #065f46; /* accentkleur licht variant */
+    
+    /* Status Bar */
+    .status-bar {
+      height: var(--statusbar-height);
+      background-color: var(--accent-color);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--text-primary);
+      border-top: 1px solid var(--border-color);
     }
-    /* Chevron rotatie */
-    .chevron {
-      transition: transform 0.2s ease-in-out;
-      font-size: 0.75rem;
-      margin-right: 0.5rem;
-      visibility: hidden;
+    
+    .status-item {
+      margin-right: 16px;
     }
-    .rotate {
-      transform: rotate(90deg);
+    
+    /* Context Menu */
+    .context-menu {
+      position: absolute;
+      background-color: #222222;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      min-width: 180px;
+      display: none;
     }
-    /* Spinner */
-    .spinner {
-      border: 8px solid rgba(255, 255, 255, 0.1);
-      border-top: 8px solid #14b8a6; /* accent teal */
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
+    
+    .context-menu-item {
+      padding: 6px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      color: var(--text-primary);
     }
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
+    
+    .context-menu-item:hover {
+      background-color: var(--item-hover);
     }
+    
+    .context-menu-item i {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+    }
+    
+    /* Loading Overlay */
     #loadingOverlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(31, 41, 55, 0.85);
+      background: rgba(0, 0, 0, 0.85);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 100;
     }
-    /* Toolbar knoppen met accentkleur (teal) */
-    .toolbar-button {
+    
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid var(--text-primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Breadcrumbs */
+    .breadcrumbs {
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 0.5rem 1rem;
-      margin-right: 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      background-color: #14b8a6; /* accent teal */
-      color: #f9fafb;
-      transition: background-color 0.2s;
+      padding: 8px 16px;
+      background-color: #1a1a1a;
+      border-bottom: 1px solid var(--border-color);
     }
-    .toolbar-button:hover {
-      background-color: #0e7968; /* donkerder teal bij hover */
+    
+    .breadcrumb {
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
-    .toolbar-button i {
-      margin-right: 0.5rem;
+    
+    .breadcrumb:hover {
+      background-color: var(--item-hover);
+    }
+    
+    .breadcrumb-separator {
+      margin: 0 4px;
+      color: var(--text-secondary);
+    }
+    
+    .breadcrumb.active {
+      color: var(--text-primary);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+      .editor-preview-container {
+        flex-direction: column;
+      }
+      
+      .editor-container {
+        height: 50%;
+      }
+      
+      .preview-container {
+        height: 50%;
+      }
     }
   </style>
 </head>
-<body class="flex flex-col h-screen">
-  <!-- Laad-overlay -->
-  <div id="loadingOverlay">
-    <div class="spinner"></div>
-  </div>
-
-  <!-- Toolbar -->
-  <div class="flex items-center p-3 bg-gray-800 text-white">
-    <button id="openBtn" class="toolbar-button" disabled>
-      <i class="fas fa-folder-open"></i>Open Map
-    </button>
-    <button id="newFolderBtn" class="toolbar-button" disabled>
-      <i class="fas fa-folder-plus"></i>Nieuwe Map
-    </button>
-    <button id="newFileBtn" class="toolbar-button" disabled>
-      <i class="fas fa-file-circle-plus"></i>Nieuw Bestand
-    </button>
-    <button id="saveBtn" class="toolbar-button ml-auto" disabled>
-      <i class="fas fa-save"></i>Opslaan
-    </button>
-  </div>
-
-  <!-- Hoofdcontainer -->
-  <div class="flex flex-1 overflow-hidden">
-    <!-- File Tree Sidebar -->
-    <div id="fileTree"></div>
-    <!-- Monaco Editor -->
-    <div id="editor" class="w-1/2"></div>
-    <!-- Live Preview -->
-    <iframe id="preview" class="w-1/2"></iframe>
+<body>
+  <div id="app">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="openBtn" class="toolbar-button" disabled>
+        <i class="fas fa-folder-open"></i>Open Map
+      </button>
+      <button id="newFolderBtn" class="toolbar-button" disabled>
+        <i class="fas fa-folder-plus"></i>Nieuwe Map
+      </button>
+      <button id="newFileBtn" class="toolbar-button" disabled>
+        <i class="fas fa-file-circle-plus"></i>Nieuw Bestand
+      </button>
+      <button id="saveBtn" class="toolbar-button" disabled>
+        <i class="fas fa-save"></i>Opslaan
+      </button>
+      
+      <div class="toolbar-spacer"></div>
+      
+      <button id="runBtn" class="toolbar-button">
+        <i class="fas fa-play"></i>Uitvoeren
+      </button>
+    </div>
+    
+    <!-- Breadcrumbs -->
+    <div id="breadcrumbs" class="breadcrumbs"></div>
+    
+    <!-- Main Content -->
+    <div class="main-container">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <i class="fas fa-folder-open"></i> Verkenner
+        </div>
+        <div id="fileTree"></div>
+      </div>
+      
+      <!-- Editor and Preview -->
+      <div class="editor-preview-container">
+        <div class="editor-container">
+          <div id="editor"></div>
+        </div>
+        <div class="preview-container">
+          <div class="preview-header">
+            <i class="fas fa-eye"></i> Live Voorbeeld
+          </div>
+          <iframe id="preview"></iframe>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-item" id="fileStatus">Geen bestand geopend</div>
+      <div class="status-item" id="cursorPosition">Ln 1, Col 1</div>
+      <div class="status-item" id="fileType">HTML</div>
+    </div>
+    
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+      <div class="context-menu-item" id="ctxOpen">
+        <i class="fas fa-folder-open"></i> Openen
+      </div>
+      <div class="context-menu-item" id="ctxRename">
+        <i class="fas fa-edit"></i> Hernoemen
+      </div>
+      <div class="context-menu-item" id="ctxDelete">
+        <i class="fas fa-trash"></i> Verwijderen
+      </div>
+      <div class="context-menu-item" id="ctxNewFile">
+        <i class="fas fa-file"></i> Nieuw Bestand
+      </div>
+      <div class="context-menu-item" id="ctxNewFolder">
+        <i class="fas fa-folder"></i> Nieuwe Map
+      </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+    </div>
   </div>
 
   <script>
@@ -169,48 +447,158 @@
     let currentHandle = null;
     let currentDirHandle = null;
     let autosaveInterval;
+    let draggedItem = null;
+    let contextMenuItem = null;
+    let breadcrumbs = [];
 
-    // Monaco Editor initialiseren
+    // Initialize Monaco Editor
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
     require(["vs/editor/editor.main"], function () {
+      // Define custom theme
+      monaco.editor.defineTheme('webitztheme', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: '', foreground: 'ffffff' },
+          { token: 'comment', foreground: '888888' },
+          { token: 'keyword', foreground: 'ffffff', fontStyle: 'bold' },
+          { token: 'identifier', foreground: 'ffffff' },
+          { token: 'string', foreground: 'dddddd' },
+          { token: 'number', foreground: 'ffffff' },
+        ],
+        colors: {
+          'editor.background': '#000000',
+          'editor.foreground': '#ffffff',
+          'editorCursor.foreground': '#ffffff',
+          'editor.lineHighlightBackground': '#111111',
+          'editorLineNumber.foreground': '#555555',
+          'editor.selectionBackground': '#333333',
+          'editor.inactiveSelectionBackground': '#222222',
+          'editorIndentGuide.background': '#333333',
+          'editorIndentGuide.activeBackground': '#666666',
+        }
+      });
+
+      // Create editor with custom theme
       editor = monaco.editor.create(document.getElementById('editor'), {
         value: `<!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Webitz</title>
+  <title>Webitz Project</title>
   <style>
-    body { font-family: sans-serif; background: #1e293b; color: #e5e7eb; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #000000;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    h1 {
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    
+    p {
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #cccccc;
+    }
+    
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .feature {
+      background: #111111;
+      padding: 20px;
+      border-radius: 8px;
+      width: 200px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      border: 1px solid #333333;
+    }
+    
+    .feature i {
+      font-size: 24px;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center; margin-top:2rem;">Webitz Preview</h1>
+  <div class="container">
+    <h1>Welkom bij Webitz!</h1>
+    <p>Dit is uw nieuwe project. Bewerk deze pagina en zie live veranderingen in de preview.</p>
+    
+    <div class="features">
+      <div class="feature">
+        <i class="fas fa-file-code"></i>
+        <h3>HTML Editor</h3>
+        <p>Bewerk HTML met syntax highlighting</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-sync-alt"></i>
+        <h3>Live Preview</h3>
+        <p>Zie veranderingen direct</p>
+      </div>
+      <div class="feature">
+        <i class="fas fa-folder"></i>
+        <h3>Bestandsbeheer</h3>
+        <p>Creëer en beheer bestanden</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>`,
         language: 'html',
-        theme: 'vs-dark',
+        theme: 'webitztheme',
+        automaticLayout: true,
+        minimap: { enabled: true },
+        fontSize: 14,
+        scrollBeyondLastLine: false
       });
 
-      editor.onDidChangeModelContent(() => updatePreview());
-      updatePreview();
+      // Update cursor position
+      editor.onDidChangeCursorPosition(e => {
+        const position = e.position;
+        document.getElementById('cursorPosition').textContent = 
+          `Ln ${position.lineNumber}, Col ${position.column}`;
+      });
 
-      // Verberg loading overlay als editor klaar is
+      // Update preview on content change
+      editor.onDidChangeModelContent(() => {
+        updatePreview();
+        document.getElementById('saveBtn').disabled = false;
+      });
+
+      // Hide loading overlay
       document.getElementById('loadingOverlay').style.display = 'none';
 
-      // Activeer knoppen als FS API beschikbaar is
+      // Enable buttons if FS API available
       if ('showDirectoryPicker' in window) {
         document.getElementById('openBtn').disabled = false;
         document.getElementById('newFolderBtn').disabled = false;
         document.getElementById('newFileBtn').disabled = false;
       }
 
-      // Autosave elke 30 seconden
+      // Setup autosave
       autosaveInterval = setInterval(() => {
         if (currentHandle) saveFile();
       }, 30000);
 
-      // Ctrl+S shortcut
+      // Setup Ctrl+S shortcut
       window.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
           e.preventDefault();
@@ -219,45 +607,42 @@
       });
     });
 
-    // Live preview updaten
+    // Update preview
     function updatePreview() {
       const iframe = document.getElementById('preview');
       const doc = iframe.contentWindow.document;
       const code = editor.getValue();
-      const model = editor.getModel();
-      const path = model.uri.path || '';
-      const ext = path.split('.').pop().toLowerCase();
-
+      
       doc.open();
-      if (ext === 'txt' || ext === 'md') {
-        const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        doc.write(`<pre style="color:#f3f4f6; background:#1e293b; padding:1rem;">${escaped}</pre>`);
-      } else {
-        doc.write(code);
-      }
+      doc.write(code);
       doc.close();
     }
 
-    // Bestand opslaan
+    // Save file
     async function saveFile() {
       try {
         if (!currentHandle) return;
         const writable = await currentHandle.createWritable();
         await writable.write(editor.getValue());
         await writable.close();
-        console.log("Saved:", currentHandle.name);
+        document.getElementById('saveBtn').disabled = true;
+        document.getElementById('fileStatus').textContent = `Opgeslagen: ${currentHandle.name}`;
+        setTimeout(() => {
+          document.getElementById('fileStatus').textContent = currentHandle.name;
+        }, 2000);
       } catch (err) {
         console.error("Opslaan mislukt", err);
         alert("Opslaan mislukt. Controleer of je browser dit ondersteunt.");
       }
     }
 
-    // “Open Map”-knop
+    // Open directory
     document.getElementById('openBtn').addEventListener('click', async () => {
       try {
         currentDirHandle = await window.showDirectoryPicker();
-        fileTree.innerHTML = '';
-        await listEntries(currentDirHandle, fileTree);
+        breadcrumbs = [{name: currentDirHandle.name, handle: currentDirHandle}];
+        updateBreadcrumbs();
+        await refreshTree();
         document.getElementById('saveBtn').disabled = false;
       } catch (err) {
         console.error("Map openen mislukt", err);
@@ -265,7 +650,7 @@
       }
     });
 
-    // “Nieuwe Map”-knop
+    // New folder
     document.getElementById('newFolderBtn').addEventListener('click', async () => {
       if (!currentDirHandle) return alert("Open eerst een map om een nieuwe map te maken.");
       const folderName = prompt("Naam nieuwe map:");
@@ -279,7 +664,7 @@
       }
     });
 
-    // “Nieuw Bestand”-knop
+    // New file
     document.getElementById('newFileBtn').addEventListener('click', async () => {
       if (!currentDirHandle) return alert("Open eerst een map om een nieuw bestand te maken.");
       const fileName = prompt("Bestandsnaam (inclusief extensie):");
@@ -287,255 +672,427 @@
       try {
         const newHandle = await currentDirHandle.getFileHandle(fileName, { create: true });
         await refreshTree();
-        // Open direct het nieuwe bestand
+        // Open the new file
         const file = await newHandle.getFile();
         const text = await file.text();
         editor.setValue(text);
         currentHandle = newHandle;
+        document.getElementById('fileStatus').textContent = fileName;
+        setLanguageFromExtension(fileName);
       } catch(err) {
         console.error("Bestand aanmaken mislukt", err);
         alert("Aanmaken bestand mislukt.");
       }
     });
 
-    // “Opslaan”-knop
+    // Save button
     document.getElementById('saveBtn').addEventListener('click', saveFile);
 
-    const fileTree = document.getElementById("fileTree");
-    let draggedHandle = null;
-    let draggedKind = null;
+    // Run button
+    document.getElementById('runBtn').addEventListener('click', updatePreview);
 
-    // Recursief entries tonen inclusief drag-&-drop
-    async function listEntries(dirHandle, container) {
-      container.innerHTML = '<ul class="space-y-1"></ul>';
-      const ul = container.querySelector('ul');
+    // Set language from file extension
+    function setLanguageFromExtension(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      let language = 'plaintext';
+      
+      if (ext === 'html') language = 'html';
+      else if (ext === 'css') language = 'css';
+      else if (ext === 'js') language = 'javascript';
+      else if (ext === 'json') language = 'json';
+      else if (ext === 'md') language = 'markdown';
+      
+      const model = editor.getModel();
+      monaco.editor.setModelLanguage(model, language);
+      document.getElementById('fileType').textContent = language.toUpperCase();
+    }
 
-      for await (const entry of dirHandle.values()) {
-        const li = document.createElement('li');
-        li.classList.add("rounded", "hover:bg-gray-700", "transition-colors", "duration-200", "relative");
-        li.style.display = "flex";
-        li.style.alignItems = "center";
-        li.setAttribute('draggable', true);
-
-        // Chevron icoontje (alleen zichtbaar bij map)
-        const chevron = document.createElement('i');
-        chevron.className = 'fas fa-chevron-right chevron text-gray-400';
-        if (entry.kind === 'directory') {
-          chevron.style.visibility = 'visible';
+    // Update breadcrumbs
+    function updateBreadcrumbs() {
+      const container = document.getElementById('breadcrumbs');
+      container.innerHTML = '';
+      
+      breadcrumbs.forEach((crumb, index) => {
+        const elem = document.createElement('div');
+        elem.className = 'breadcrumb';
+        if (index === breadcrumbs.length - 1) elem.classList.add('active');
+        elem.textContent = crumb.name;
+        
+        elem.addEventListener('click', async () => {
+          currentDirHandle = crumb.handle;
+          breadcrumbs = breadcrumbs.slice(0, index + 1);
+          updateBreadcrumbs();
+          await refreshTree();
+        });
+        
+        container.appendChild(elem);
+        
+        if (index < breadcrumbs.length - 1) {
+          const sep = document.createElement('div');
+          sep.className = 'breadcrumb-separator';
+          sep.innerHTML = '›';
+          container.appendChild(sep);
         }
-        li.appendChild(chevron);
+      });
+    }
 
-        // Map of bestand icoon
-        const icon = document.createElement('i');
-        icon.className = entry.kind === 'file' ? 'fas fa-file text-gray-300 mr-2' : 'fas fa-folder text-yellow-400 mr-2';
-        li.appendChild(icon);
-
-        // Naam
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = entry.name;
-        nameSpan.classList.add("text-sm", "flex-1");
-        li.appendChild(nameSpan);
-
-        // Drag events
-        li.addEventListener('dragstart', (e) => {
-          draggedHandle = entry;
-          draggedKind = entry.kind;
-          e.dataTransfer.setData('text/plain', entry.name);
-          // lichte transparantie tijdens slepen
-          li.classList.add('opacity-50');
-        });
-        li.addEventListener('dragend', () => {
-          draggedHandle = null;
-          draggedKind = null;
-          li.classList.remove('opacity-50');
-        });
-
+    // Create file tree item
+    function createTreeItem(entry, parentHandle, depth = 0) {
+      const li = document.createElement('li');
+      li.dataset.name = entry.name;
+      li.dataset.kind = entry.kind;
+      li.dataset.depth = depth;
+      li.style.paddingLeft = (depth * 16) + 'px';
+      
+      // Chevron for directories
+      const chevron = document.createElement('div');
+      chevron.className = 'chevron';
+      if (entry.kind === 'directory') {
+        chevron.classList.add('visible');
+        chevron.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      }
+      li.appendChild(chevron);
+      
+      // Icon
+      const icon = document.createElement('div');
+      icon.className = entry.kind === 'file' ? 'file-icon' : 'file-icon folder-icon';
+      icon.innerHTML = entry.kind === 'file' ? '<i class="fas fa-file"></i>' : '<i class="fas fa-folder"></i>';
+      li.appendChild(icon);
+      
+      // Name
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'file-name';
+      nameSpan.textContent = entry.name;
+      li.appendChild(nameSpan);
+      
+      // Context menu
+      li.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        contextMenuItem = entry;
+        const menu = document.getElementById('contextMenu');
+        menu.style.display = 'block';
+        menu.style.left = e.pageX + 'px';
+        menu.style.top = e.pageY + 'px';
+      });
+      
+      // Click handler
+      li.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        
         if (entry.kind === 'file') {
-          // Open bestand bij klik
-          li.addEventListener('click', async () => {
-            const file = await entry.getFile();
-            const text = await file.text();
-            editor.setValue(text);
-            currentHandle = entry;
+          // Open file
+          const file = await entry.getFile();
+          const text = await file.text();
+          editor.setValue(text);
+          currentHandle = entry;
+          document.getElementById('fileStatus').textContent = entry.name;
+          setLanguageFromExtension(entry.name);
+          
+          // Set active state
+          document.querySelectorAll('#fileTree li').forEach(el => {
+            el.classList.remove('active');
           });
+          li.classList.add('active');
         } else if (entry.kind === 'directory') {
-          // Container voor geneste inhoud
-          let expanded = false;
+          // Toggle directory
+          const isExpanded = li.classList.contains('expanded');
+          const sublist = li.querySelector('ul');
+          
+          if (isExpanded) {
+            li.classList.remove('expanded');
+            chevron.classList.remove('rotate');
+            if (sublist) sublist.style.display = 'none';
+          } else {
+            li.classList.add('expanded');
+            chevron.classList.add('rotate');
+            
+            if (!sublist) {
+              const newList = document.createElement('ul');
+              li.appendChild(newList);
+              await populateDirectory(entry, newList, depth + 1);
+            } else {
+              sublist.style.display = 'block';
+            }
+          }
+        }
+      });
+      
+      // Drag and drop
+      li.setAttribute('draggable', 'true');
+      
+      li.addEventListener('dragstart', (e) => {
+        draggedItem = {
+          handle: entry,
+          parentHandle: parentHandle,
+          element: li
+        };
+        e.dataTransfer.setData('text/plain', entry.name);
+        li.classList.add('dragging');
+      });
+      
+      li.addEventListener('dragend', () => {
+        li.classList.remove('dragging');
+        draggedItem = null;
+      });
+      
+      li.addEventListener('dragover', (e) => {
+        if (draggedItem && draggedItem.handle !== entry) {
+          e.preventDefault();
+          li.classList.add('drag-over');
+        }
+      });
+      
+      li.addEventListener('dragleave', () => {
+        li.classList.remove('drag-over');
+      });
+      
+      li.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        li.classList.remove('drag-over');
+        
+        if (!draggedItem || draggedItem.handle === entry) return;
+        
+        try {
+          // If dropped on a directory, move inside it
+          if (entry.kind === 'directory') {
+            await moveEntry(draggedItem.handle, entry, draggedItem.parentHandle);
+          } 
+          // If dropped on a file, move to its parent directory
+          else if (entry.kind === 'file') {
+            const parent = await getParentDirectory(entry);
+            if (parent) {
+              await moveEntry(draggedItem.handle, parent, draggedItem.parentHandle);
+            }
+          }
+          
+          // Refresh the entire file tree
+          await refreshTree();
+        } catch (err) {
+          console.error("Verplaatsen mislukt", err);
+          alert("Verplaatsen mislukt: " + err.message);
+        }
+      });
+      
+      return li;
+    }
+
+    // Move entry to new directory
+    async function moveEntry(entry, newDirHandle, oldParentHandle) {
+      try {
+        // Create new entry
+        if (entry.kind === 'file') {
+          const file = await entry.getFile();
+          const content = await file.text();
+          const newFile = await newDirHandle.getFileHandle(entry.name, { create: true });
+          const writable = await newFile.createWritable();
+          await writable.write(content);
+          await writable.close();
+        } else {
+          const newDir = await newDirHandle.getDirectoryHandle(entry.name, { create: true });
+          await copyDirectory(entry, newDir);
+        }
+        
+        // Remove old entry
+        if (oldParentHandle.removeEntry) {
+          await oldParentHandle.removeEntry(entry.name, { recursive: true });
+        } else {
+          throw new Error("Verwijderen wordt niet ondersteund door deze browser.");
+        }
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    // Copy directory recursively
+    async function copyDirectory(sourceDir, targetDir) {
+      for await (const entry of sourceDir.values()) {
+        if (entry.kind === 'file') {
+          const file = await entry.getFile();
+          const content = await file.text();
+          const newFile = await targetDir.getFileHandle(entry.name, { create: true });
+          const writable = await newFile.createWritable();
+          await writable.write(content);
+          await writable.close();
+        } else {
+          const newSubDir = await targetDir.getDirectoryHandle(entry.name, { create: true });
+          await copyDirectory(entry, newSubDir);
+        }
+      }
+    }
+
+    // Get parent directory (approximation)
+    async function getParentDirectory(entry) {
+      // This is a simplification - in a real app you'd need to track the hierarchy
+      return currentDirHandle;
+    }
+
+    // Populate directory
+    async function populateDirectory(dirHandle, container, depth) {
+      container.innerHTML = '';
+      
+      for await (const entry of dirHandle.values()) {
+        const li = createTreeItem(entry, dirHandle, depth);
+        container.appendChild(li);
+        
+        // Add nested list for directories
+        if (entry.kind === 'directory') {
           const sublist = document.createElement('ul');
-          sublist.classList.add('pl-6', 'hidden', 'space-y-1');
           li.appendChild(sublist);
-
-          // Klik om in/uit te vouwen
-          li.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            if (!expanded) {
-              await populateSubdirectory(entry, sublist);
-              sublist.classList.remove('hidden');
-              chevron.classList.add('rotate');
-            } else {
-              sublist.classList.add('hidden');
-              chevron.classList.remove('rotate');
-            }
-            expanded = !expanded;
-          });
-
-          // Drop target voor drag‐&‐drop
-          li.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            li.classList.add('drag-over');
-          });
-          li.addEventListener('dragleave', () => {
-            li.classList.remove('drag-over');
-          });
-          li.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            li.classList.remove('drag-over');
-            if (draggedHandle && draggedKind === 'file') {
-              // Sleep een bestand in deze map
-              try {
-                // Lees het bestand
-                const file = await draggedHandle.getFile();
-                const content = await file.text();
-                // Maak een nieuw bestand in de doelmap
-                const targetDir = entry;
-                await targetDir.getFileHandle(draggedHandle.name, { create: true })
-                  .then(async (newHandle) => {
-                    const writable = await newHandle.createWritable();
-                    await writable.write(content);
-                    await writable.close();
-                  });
-                // Verwijder oud bestand (optioneel, afhankelijk van browser-ondersteuning)
-                if (draggedHandle.requestPermission) {
-                  const parent = currentDirHandle || dirHandle;
-                  if (parent.removeEntry) {
-                    await parent.removeEntry(draggedHandle.name);
-                  }
-                }
-                await refreshTree();
-              } catch (err) {
-                console.error("Verplaatsen bestand mislukt:", err);
-                alert("Verplaatsen van bestand is niet toegestaan in jouw browser.");
-              }
-            }
-          });
         }
-
-        ul.appendChild(li);
       }
     }
 
-    // Subdirectory vullen
-    async function populateSubdirectory(dirHandle, sublist) {
-      sublist.innerHTML = '';
-      for await (const entry of dirHandle.values()) {
-        const li = document.createElement('li');
-        li.classList.add("rounded", "hover:bg-gray-700", "transition-colors", "duration-200", "relative");
-        li.style.display = "flex";
-        li.style.alignItems = "center";
-        li.setAttribute('draggable', true);
-
-        const chevron = document.createElement('i');
-        chevron.className = 'fas fa-chevron-right chevron text-gray-400';
-        if (entry.kind === 'directory') {
-          chevron.style.visibility = 'visible';
-        }
-        li.appendChild(chevron);
-
-        const icon = document.createElement('i');
-        icon.className = entry.kind === 'file' ? 'fas fa-file text-gray-300 mr-2' : 'fas fa-folder text-yellow-400 mr-2';
-        li.appendChild(icon);
-
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = entry.name;
-        nameSpan.classList.add("text-sm", "flex-1");
-        li.appendChild(nameSpan);
-
-        // Drag‐&‐drop events
-        li.addEventListener('dragstart', (e) => {
-          draggedHandle = entry;
-          draggedKind = entry.kind;
-          e.dataTransfer.setData('text/plain', entry.name);
-          li.classList.add('opacity-50');
-        });
-        li.addEventListener('dragend', () => {
-          draggedHandle = null;
-          draggedKind = null;
-          li.classList.remove('opacity-50');
-        });
-
-        if (entry.kind === 'file') {
-          li.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const file = await entry.getFile();
-            const text = await file.text();
-            editor.setValue(text);
-            currentHandle = entry;
-          });
-        } else if (entry.kind === 'directory') {
-          let expanded = false;
-          const nestedList = document.createElement('ul');
-          nestedList.classList.add('pl-6', 'hidden', 'space-y-1');
-          li.appendChild(nestedList);
-
-          li.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            if (!expanded) {
-              await populateSubdirectory(entry, nestedList);
-              nestedList.classList.remove('hidden');
-              chevron.classList.add('rotate');
-            } else {
-              nestedList.classList.add('hidden');
-              chevron.classList.remove('rotate');
-            }
-            expanded = !expanded;
-          });
-
-          li.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            li.classList.add('drag-over');
-          });
-          li.addEventListener('dragleave', () => {
-            li.classList.remove('drag-over');
-          });
-          li.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            li.classList.remove('drag-over');
-            if (draggedHandle && draggedKind === 'file') {
-              try {
-                const file = await draggedHandle.getFile();
-                const content = await file.text();
-                const targetDir = entry;
-                await targetDir.getFileHandle(draggedHandle.name, { create: true })
-                  .then(async (newHandle) => {
-                    const writable = await newHandle.createWritable();
-                    await writable.write(content);
-                    await writable.close();
-                  });
-                if (draggedHandle.requestPermission) {
-                  if (currentDirHandle.removeEntry) {
-                    await currentDirHandle.removeEntry(draggedHandle.name);
-                  }
-                }
-                await refreshTree();
-              } catch (err) {
-                console.error("Verplaatsen bestand mislukt:", err);
-                alert("Verplaatsen van bestand is niet toegestaan in jouw browser.");
-              }
-            }
-          });
-        }
-
-        sublist.appendChild(li);
-      }
-    }
-
-    // Vernieuw file tree
+    // Refresh file tree
     async function refreshTree() {
       if (currentDirHandle) {
+        const fileTree = document.getElementById('fileTree');
         fileTree.innerHTML = '';
-        await listEntries(currentDirHandle, fileTree);
+        const rootList = document.createElement('ul');
+        fileTree.appendChild(rootList);
+        await populateDirectory(currentDirHandle, rootList, 0);
       }
     }
+
+    // Context menu handlers
+    document.getElementById('ctxOpen').addEventListener('click', async () => {
+      if (!contextMenuItem) return;
+      
+      if (contextMenuItem.kind === 'file') {
+        const file = await contextMenuItem.getFile();
+        const text = await file.text();
+        editor.setValue(text);
+        currentHandle = contextMenuItem;
+        document.getElementById('fileStatus').textContent = contextMenuItem.name;
+        setLanguageFromExtension(contextMenuItem.name);
+      } else if (contextMenuItem.kind === 'directory') {
+        currentDirHandle = contextMenuItem;
+        breadcrumbs.push({name: contextMenuItem.name, handle: contextMenuItem});
+        updateBreadcrumbs();
+        await refreshTree();
+      }
+      
+      document.getElementById('contextMenu').style.display = 'none';
+    });
+    
+    document.getElementById('ctxRename').addEventListener('click', async () => {
+      if (!contextMenuItem) return;
+      
+      const newName = prompt("Nieuwe naam:", contextMenuItem.name);
+      if (!newName || newName === contextMenuItem.name) return;
+      
+      try {
+        // Rename by creating a new entry and deleting the old one
+        if (contextMenuItem.kind === 'file') {
+          const file = await contextMenuItem.getFile();
+          const content = await file.text();
+          const parent = await getParentDirectory(contextMenuItem);
+          const newFile = await parent.getFileHandle(newName, { create: true });
+          const writable = await newFile.createWritable();
+          await writable.write(content);
+          await writable.close();
+          
+          if (parent.removeEntry) {
+            await parent.removeEntry(contextMenuItem.name);
+          }
+        } else {
+          const parent = await getParentDirectory(contextMenuItem);
+          const newDir = await parent.getDirectoryHandle(newName, { create: true });
+          await copyDirectory(contextMenuItem, newDir);
+          
+          if (parent.removeEntry) {
+            await parent.removeEntry(contextMenuItem.name, { recursive: true });
+          }
+        }
+        
+        await refreshTree();
+      } catch (err) {
+        console.error("Hernoemen mislukt", err);
+        alert("Hernoemen mislukt: " + err.message);
+      }
+      
+      document.getElementById('contextMenu').style.display = 'none';
+    });
+    
+    document.getElementById('ctxDelete').addEventListener('click', async () => {
+      if (!contextMenuItem) return;
+      
+      const confirmDelete = confirm(`Weet u zeker dat u "${contextMenuItem.name}" wilt verwijderen?`);
+      if (!confirmDelete) return;
+      
+      try {
+        const parent = await getParentDirectory(contextMenuItem);
+        if (parent.removeEntry) {
+          await parent.removeEntry(contextMenuItem.name, { recursive: true });
+          await refreshTree();
+          
+          // If we deleted the current file, clear the editor
+          if (currentHandle === contextMenuItem) {
+            editor.setValue('');
+            currentHandle = null;
+            document.getElementById('fileStatus').textContent = 'Geen bestand geopend';
+          }
+        } else {
+          throw new Error("Verwijderen wordt niet ondersteund door deze browser.");
+        }
+      } catch (err) {
+        console.error("Verwijderen mislukt", err);
+        alert("Verwijderen mislukt: " + err.message);
+      }
+      
+      document.getElementById('contextMenu').style.display = 'none';
+    });
+    
+    document.getElementById('ctxNewFile').addEventListener('click', async () => {
+      if (!contextMenuItem || contextMenuItem.kind !== 'directory') return;
+      
+      const fileName = prompt("Bestandsnaam (inclusief extensie):");
+      if (!fileName) return;
+      
+      try {
+        const newHandle = await contextMenuItem.getFileHandle(fileName, { create: true });
+        await refreshTree();
+        
+        // Open the new file
+        const file = await newHandle.getFile();
+        const text = await file.text();
+        editor.setValue(text);
+        currentHandle = newHandle;
+        document.getElementById('fileStatus').textContent = fileName;
+        setLanguageFromExtension(fileName);
+      } catch(err) {
+        console.error("Bestand aanmaken mislukt", err);
+        alert("Aanmaken bestand mislukt.");
+      }
+      
+      document.getElementById('contextMenu').style.display = 'none';
+    });
+    
+    document.getElementById('ctxNewFolder').addEventListener('click', async () => {
+      if (!contextMenuItem || contextMenuItem.kind !== 'directory') return;
+      
+      const folderName = prompt("Naam nieuwe map:");
+      if (!folderName) return;
+      
+      try {
+        await contextMenuItem.getDirectoryHandle(folderName, { create: true });
+        await refreshTree();
+      } catch (err) {
+        console.error("Map aanmaken mislukt", err);
+        alert("Aanmaken map mislukt.");
+      }
+      
+      document.getElementById('contextMenu').style.display = 'none';
+    });
+    
+    // Close context menu when clicking elsewhere
+    document.addEventListener('click', () => {
+      document.getElementById('contextMenu').style.display = 'none';
+    });
+    
+    // Initialize
+    updatePreview();
   </script>
 </body>
 </html>
