@@ -10,4 +10,4 @@ echo Commit message: %result%
 
 git add .
 git commit -m "%result%"
-@REM git push origin main
+git push origin main
