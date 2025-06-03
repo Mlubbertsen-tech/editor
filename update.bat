@@ -1,17 +1,13 @@
 @echo off
-REM Genereer nette commit message via PowerShell
+setlocal enabledelayedexpansion
 
-for /f "delims=" %%i in ('powershell -Command "((git diff --name-status) ^| ForEach-Object { $parts = $_ -split \"`t\"; switch ($parts[0]) { 'A' { \"added $($parts[1])\" }; 'M' { \"updated $($parts[1])\" }; 'D' { \"deleted $($parts[1])\" }; default { \"$($parts[0]) $($parts[1])\" } } }) -join ', '"') do set msg=%%i
-
-REM Check of er iets is om te committen
-git diff --cached --quiet
-if %errorlevel%==0 (
-    echo Geen wijzigingen om te committen 😴
-    exit /b
+:: Roep PowerShell script aan, sla output op in variabele
+for /f "delims=" %%A in ('powershell -NoProfile -ExecutionPolicy Bypass -File generate_commit_msg.ps1') do (
+    set "result=%%A"
 )
 
-@echo on
-REM Commit en push
+echo Commit message: %result%
+
 git add .
-git commit -m "Update: %msg%"
+git commit -m "%result%"
 git push origin main
