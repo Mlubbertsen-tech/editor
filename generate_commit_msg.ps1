@@ -15,7 +15,7 @@ $msgParts = foreach ($line in $diffs) {
     }
 }
 
-$msg = "Update:" + ($msgParts -join " ")
+$msg = "Update: " + ($msgParts -join " ")
 $msg = $msg.TrimEnd(';')
 
 Write-Output $msg
