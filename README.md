@@ -1,9 +1,9 @@
-<style>
+<!-- <style>
 .live-button {
     display: inline-block;
     padding: 12px 24px;
-    background: linear-gradient(135deg,rgb(241, 232, 99) 0%,rgb(197, 155, 17) 100%);
-    color: black;
+    background: linear-gradient(135deg, #F1E863 0%, #C59B11 100%);
+    color: #000000;
     text-decoration: none;
     border-radius: 8px;
     font-weight: bold;
@@ -27,7 +27,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     color: black;
 }
-</style>
+</style> -->
 
 # Webitz Frontend Code Editor
 
@@ -42,7 +42,9 @@
 
 **Webitz** is a powerful and fun web-based code editor for all frontend developers! 🚀
 
-<a href="https://webitz.vercel.app" class="live-button">Try it Live on Vercel!</a>
+<!-- <a href="https://webitz.vercel.app" class="live-button">Try it Live on Vercel!</a> -->
+![Webitz Logo](cdn/images/live.svg)
+
 
 ### Main Features
 
@@ -74,7 +76,8 @@ Icons and manifest support are included for a better experience on modern device
 
 **Webitz** is een krachtige en vrolijke webgebaseerde code-editor voor frontend developers! 🥳
 
-<a href="https://webitz.vercel.app" class="live-button">Probeer het Live op Vercel!</a>
+<!-- <a href="https://webitz.vercel.app" class="live-button">Probeer het Live op Vercel!</a> -->
+![Webitz Logo](cdn/images/live.svg)
 
 ### Belangrijkste functies
 
