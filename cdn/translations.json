@@ -1,0 +1,122 @@
+    {
+        "fr": {
+            "nav": {
+                "home": "Accueil",
+                "features": "Fonctionnalités",
+                "docs": "Documentation",
+                "contact": "Contact"
+            },
+            "hero": {
+                "title": "L'endroit idéal pour les développeurs frontend!",
+                "subtitle": "Codez directement dans votre navigateur. Aucune installation nécessaire.",
+                "cta": "Lancer l'éditeur"
+            },
+            "features": {
+                "title": "Fonctionnalités",
+                "fs": {
+                    "title": "Système de fichiers",
+                    "desc": "Sauvegardez tous vos fichiers directement sur votre machine."
+                },
+                "live": {
+                    "title": "Aperçu en direct",
+                    "desc": "Visualisez vos modifications HTML/CSS/JS en temps réel."
+                },
+                "monaco": {
+                    "title": "Éditeur Monaco",
+                    "desc": "Profitez d'un éditeur de code professionnel dans votre navigateur."
+                }
+            },
+            "docs": {
+                "title": "Comment ça marche",
+                "steps": [
+                    "Étape 1: Créez un nouveau projet dans le système de fichiers.",
+                    "Étape 2: Écrivez votre code dans l'éditeur Monaco.",
+                    "Étape 3: Visualisez le résultat instantanément dans l'aperçu en direct."
+                ]
+            },
+            "footer": {
+                "text": "© 2025 Webitz – Fièrement créé par Mlubbertsen-tech/webitz",
+                "credit": "Créé par un développeur de 13 ans"
+            }
+        },
+        "en": {
+            "nav": {
+                "home": "Home",
+                "features": "Features",
+                "docs": "Docs",
+                "contact": "Contact"
+            },
+            "hero": {
+                "title": "The place to be for frontend developers!",
+                "subtitle": "Code directly in your browser. No installation needed.",
+                "cta": "Launch editor"
+            },
+            "features": {
+                "title": "Features",
+                "fs": {
+                    "title": "File System",
+                    "desc": "Save all your files directly to your machine."
+                },
+                "live": {
+                    "title": "Live Preview",
+                    "desc": "See your HTML/CSS/JS changes in real time."
+                },
+                "monaco": {
+                    "title": "Monaco Editor",
+                    "desc": "Experience a professional code editor in your browser."
+                }
+            },
+            "docs": {
+                "title": "How it works",
+                "steps": [
+                    "Step 1: Create a new project in the file system.",
+                    "Step 2: Type your code in the Monaco Editor.",
+                    "Step 3: See the result instantly in Live Preview."
+                ]
+            },
+            "footer": {
+                "text": "© 2025 Webitz – Proudly made by Mlubbertsen-tech/webitz",
+                "credit": "Created by a 13-year-old developer"
+            }
+        },
+        "nl": {
+            "nav": {
+                "home": "Home",
+                "features": "Features",
+                "docs": "Docs",
+                "contact": "Contact"
+            },
+            "hero": {
+                "title": "The place to be voor frontend developers!",
+                "subtitle": "Code direct in je browser. Geen installatie nodig.",
+                "cta": "Launch editor"
+            },
+            "features": {
+                "title": "Features",
+                "fs": {
+                    "title": "Bestandssysteem",
+                    "desc": "Sla al je bestanden direct op je machine op."
+                },
+                "live": {
+                    "title": "Live Preview",
+                    "desc": "Zie je HTML/CSS/JS-wijzigingen real time."
+                },
+                "monaco": {
+                    "title": "Monaco Editor",
+                    "desc": "Ervaar een professionele code editor in je browser."
+                }
+            },
+            "docs": {
+                "title": "Hoe het werkt",
+                "steps": [
+                    "Stap 1: Maak een nieuw project aan in het bestandssysteem.",
+                    "Stap 2: Typ je code in de Monaco Editor.",
+                    "Stap 3: Zie direct het resultaat in de Live Preview."
+                ]
+            },
+            "footer": {
+                "text": "© 2025 Webitz – Proudly made by Mlubbertsen-tech/webitz",
+                "credit": "Gemaakt door een 13-jarige ontwikkelaar"
+            }
+        }
+    }
